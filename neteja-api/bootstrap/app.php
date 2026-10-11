@@ -1,10 +1,14 @@
 <?php
 
+use App\Modules\Auth\Http\Middleware\EnsurePasswordChanged;
 use App\Modules\Compliance\Http\Middleware\EnsureLatestConsents;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,9 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->statefulApi();       // Sanctum en mode SPA (cookies)
-        $middleware->throttleApi('api');  // limite générale 60/min (définie à l'étape 9)
-        $middleware->alias(['consent' => EnsureLatestConsents::class]);
+        $middleware->statefulApi();
+        $middleware->throttleApi('api');
+        $middleware->alias([
+            'consent' => EnsureLatestConsents::class,
+            'password.changed' => EnsurePasswordChanged::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

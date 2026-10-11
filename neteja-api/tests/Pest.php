@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use App\Modules\Compliance\Services\ConsentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +49,18 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/** En-tête qui fait passer la requête pour une requête du front React (mode session). */
+function spa(): array
+{
+    return ['Referer' => 'http://localhost'];
+}
+
+/** Un utilisateur qui a déjà accepté les CGU (pour tester le reste sans être bloqué). */
+function consenting(User $user): User
+{
+    app(ConsentService::class)->accept($user, array_keys(config('legal.versions')), '127.0.0.1');
+
+    return $user;
 }
