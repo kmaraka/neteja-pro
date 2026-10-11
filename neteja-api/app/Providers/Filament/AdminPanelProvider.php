@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,6 +31,12 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => '#1E5145',   // vert Neteja : Filament génère les nuances automatiquement
             ])
+            ->profile() // page de profil : on y gère la 2FA et les codes de secours
+            ->multiFactorAuthentication([
+                AppAuthentication::make()
+                    ->brandName('Neteja') // nom affiché dans l'application d'authentification
+                    ->recoverable(),      // codes de secours
+            ], isRequired: true)
             ->brandName('Neteja — Docteur Maison')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

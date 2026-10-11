@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Auth\Models\Role;
 use App\Modules\Auth\Services\AuditLogger;
 use App\Modules\Auth\Services\InternalAccountService;
+use App\Modules\Auth\Services\TwoFactorService;
 use App\Modules\Compliance\Services\AccountErasureService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -28,6 +29,10 @@ class UsersTable
                 TextColumn::make('phone')->label('Téléphone')->searchable()->placeholder('—'),
                 TextColumn::make('email')->label('Email')->searchable()->placeholder('—'),
                 TextColumn::make('roles.name')->label('Rôles')->badge(),
+                IconColumn::make('two_factor')
+                    ->label('2FA')
+                    ->state(fn (User $record): bool => app(TwoFactorService::class)->isEnabled($record))
+                    ->boolean(),
                 IconColumn::make('must_change_password')->label('Mot de passe temporaire')->boolean(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
@@ -67,6 +72,27 @@ class UsersTable
                         $smsSent
                             ? Notification::make()->success()->title('Mot de passe temporaire envoyé par SMS')->send()
                             : Notification::make()->warning()->title("Le SMS n'a pas pu être envoyé")->body('Réessayez dans un instant.')->send();
+                    }),
+
+                Action::make('resetMfa')
+                    ->label('Réinitialiser le 2FA')
+                    ->icon(Heroicon::OutlinedShieldExclamation)
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalDescription('Le 2FA du compte sera supprimé et ses sessions fermées. La personne devra le reconfigurer à sa prochaine connexion.')
+                    ->visible(fn (User $record): bool => app(TwoFactorService::class)->isEnabled($record)
+                        && ! $record->is(auth()->user())
+                        && auth()->user()->can('update', $record))
+                    ->action(function (User $record): void {
+                        try {
+                            app(TwoFactorService::class)->reset($record, auth()->user());
+                        } catch (AuthorizationException $e) {
+                            Notification::make()->danger()->title($e->getMessage())->send();
+
+                            return;
+                        }
+
+                        Notification::make()->success()->title('2FA réinitialisé')->send();
                     }),
 
                 Action::make('anonymize')
