@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),   // log (dev) ou http (production)
+        'url' => env('SMS_API_URL'),
+        'token' => env('SMS_API_TOKEN'),
+    ],
+
 ];

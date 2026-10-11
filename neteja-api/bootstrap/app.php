@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Compliance\Http\Middleware\EnsureLatestConsents;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->statefulApi();       // Sanctum en mode SPA (cookies)
+        $middleware->throttleApi('api');  // limite générale 60/min (définie à l'étape 9)
+        $middleware->alias(['consent' => EnsureLatestConsents::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
