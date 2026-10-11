@@ -28,7 +28,8 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
-        'role' => Role::class,
+        // 'role' => Role::class,
+        'role' => App\Modules\Auth\Models\Role::class,
 
         /*
          * When using the "Teams" feature from this package, we need to know which
