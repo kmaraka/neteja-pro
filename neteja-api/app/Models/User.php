@@ -6,6 +6,8 @@ namespace App\Models;
 use App\Modules\Auth\Models\Role;
 use App\Modules\Compliance\Models\UserConsent;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -18,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'phone', 'prefers_sms'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
@@ -46,6 +48,15 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Le niveau d'un utilisateur est celui de son rôle le plus puissant (le plus petit nombre).
         return $this->roles->min('hierarchy_level') ?? PHP_INT_MAX;
+    }
+
+    /** Rôles autorisés à entrer dans le back-office Filament. */
+    public const PANEL_ROLES = ['super-admin', 'admin', 'superviseur'];
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->anonymized_at === null
+            && $this->hasAnyRole(self::PANEL_ROLES);
     }
 
     public function canManageRole(Role $role): bool

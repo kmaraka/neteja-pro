@@ -21,8 +21,13 @@ class Role extends SpatieRole
 
     protected static function booted(): void
     {
-        // Pas de clé étrangère en base : on détache les rôles enfants à la suppression.
         static::deleting(function (Role $role) {
+            // Un rôle système (admin, client...) ne se supprime jamais : le code le référence.
+            if ($role->is_system) {
+                return false; // false = l'événement annule la suppression
+            }
+
+            // Pas de clé étrangère en base : on détache les rôles enfants.
             static::where('parent_role_id', $role->id)->update(['parent_role_id' => null]);
         });
     }
