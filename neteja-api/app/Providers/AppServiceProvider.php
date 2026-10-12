@@ -11,6 +11,10 @@ use App\Modules\Auth\Policies\UserPolicy;
 use App\Modules\Core\Sms\HttpSmsGateway;
 use App\Modules\Core\Sms\LogSmsGateway;
 use App\Modules\Core\Sms\SmsGateway;
+use App\Modules\Ecommerce\Models\Category;
+use App\Modules\Ecommerce\Models\Product;
+use App\Modules\Ecommerce\Policies\CategoryPolicy;
+use App\Modules\Ecommerce\Policies\ProductPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -45,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(AuditLog::class, AuditLogPolicy::class);
+        Gate::policy(Category::class, CategoryPolicy::class);
+        Gate::policy(Product::class, ProductPolicy::class);
 
         // Le lien de l'email "mot de passe oublié" pointe vers la page React.
         ResetPassword::createUrlUsing(fn ($user, string $token) => config('neteja.frontend_url')
