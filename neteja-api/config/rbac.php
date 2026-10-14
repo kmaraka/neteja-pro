@@ -8,6 +8,7 @@ return [
         'audit' => ['view'],
         'catalog' => ['view', 'create', 'update'],
         'promotions' => ['view', 'create', 'update'],
+        'orders' => ['view', 'update'],
     ],
 
     // Textes affichés dans l'écran de gestion des rôles.
@@ -17,6 +18,7 @@ return [
         'audit' => "Journal d'audit",
         'catalog' => 'Catalogue et boutique',
         'promotions' => 'Promotions et codes promo',
+        'orders' => 'Commandes',
     ],
 
     'action_labels' => [

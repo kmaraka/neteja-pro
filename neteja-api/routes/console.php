@@ -42,3 +42,4 @@ Artisan::command('dev:links {type? : verify ou reset}', function (?string $type 
 // Nettoyage quotidien des paniers de visiteurs inactifs (actif en production seulement
 // si une tâche système lance "php artisan schedule:run" chaque minute : Phase 10).
 Schedule::command('shop:prune-guest-carts')->daily();
+Schedule::command('shop:expire-unpaid-orders')->everyFiveMinutes();

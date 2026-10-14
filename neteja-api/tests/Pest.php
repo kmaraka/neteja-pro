@@ -2,6 +2,9 @@
 
 use App\Models\User;
 use App\Modules\Compliance\Services\ConsentService;
+use App\Modules\Ecommerce\Models\Order;
+use App\Modules\Ecommerce\Models\Product;
+use App\Modules\Ecommerce\Models\ProductVariant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -63,4 +66,26 @@ function consenting(User $user): User
     app(ConsentService::class)->accept($user, array_keys(config('legal.versions')), '127.0.0.1');
 
     return $user;
+}
+
+/** Une commande existante avec 1 article. Le stock de la variante est celui APRÈS réservation. */
+function makeOrder(?User $user = null, array $attributes = [], int $quantity = 2, int $stock = 8): Order
+{
+    $variant = ProductVariant::factory()->for(Product::factory()->create())->create([
+        'price_fcfa' => 5000,
+        'stock' => $stock,
+    ]);
+
+    $order = Order::factory()->create(['user_id' => ($user ?? User::factory()->create())->id] + $attributes);
+
+    $order->items()->create([
+        'product_variant_id' => $variant->id,
+        'product_name' => 'Eau de Javel',
+        'variant_name' => '1 L',
+        'unit_price_fcfa' => 5000,
+        'quantity' => $quantity,
+        'line_total_fcfa' => 5000 * $quantity,
+    ]);
+
+    return $order;
 }
