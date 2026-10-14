@@ -18,6 +18,7 @@ class AccountErasureService
             $this->devices->revokeOthers($user); // jetons d'API et sessions de tous les appareils
             $user->syncRoles([]);
             $user->addresses()->delete();        // adresses de livraison : données personnelles
+            $user->cart()->delete();             // panier du compte
 
             $user->forceFill([
                 'name' => 'Utilisateur supprimé',

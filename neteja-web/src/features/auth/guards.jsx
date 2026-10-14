@@ -7,7 +7,7 @@ function Splash() {
   )
 }
 
-// Pages accessibles même si des consentements sont en attente.
+// Seules ces pages restent ouvertes tant que des consentements sont en attente.
 const OPEN_WITH_PENDING_CONSENTS = ['/conditions', '/changer-mot-de-passe']
 
 /** Réservé aux utilisateurs connectés, dans le bon état. */
