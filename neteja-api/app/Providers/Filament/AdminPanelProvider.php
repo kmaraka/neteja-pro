@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('Neteja — Docteur Maison')
             ->colors([
                 'primary' => '#1E5145',   // vert Neteja : Filament génère les nuances automatiquement
             ])
@@ -37,7 +38,6 @@ class AdminPanelProvider extends PanelProvider
                     ->brandName('Neteja') // nom affiché dans l'application d'authentification
                     ->recoverable(),      // codes de secours
             ], isRequired: true)
-            ->brandName('Neteja — Docteur Maison')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Auth\Models\Role;
 use App\Modules\Compliance\Models\UserConsent;
 use App\Modules\Ecommerce\Models\Address;
+use App\Modules\Ecommerce\Models\Cart;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -44,6 +45,26 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         ];
     }
 
+    /** Rôles autorisés à entrer dans le back-office Filament. */
+    public const PANEL_ROLES = ['super-admin', 'admin', 'superviseur'];
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->anonymized_at === null
+            && $this->hasAnyRole(self::PANEL_ROLES);
+    }
+
+    public function hierarchyLevel(): int
+    {
+        // Le niveau d'un utilisateur est celui de son rôle le plus puissant (le plus petit nombre).
+        return $this->roles->min('hierarchy_level') ?? PHP_INT_MAX;
+    }
+
+    public function canManageRole(Role $role): bool
+    {
+        return $this->hierarchyLevel() < $role->hierarchy_level;
+    }
+
     public function consents(): HasMany
     {
         return $this->hasMany(UserConsent::class);
@@ -54,23 +75,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(Address::class);
     }
 
-    public function hierarchyLevel(): int
+    public function cart(): HasOne
     {
-        // Le niveau d'un utilisateur est celui de son rôle le plus puissant (le plus petit nombre).
-        return $this->roles->min('hierarchy_level') ?? PHP_INT_MAX;
-    }
-
-    /** Rôles autorisés à entrer dans le back-office Filament. */
-    public const PANEL_ROLES = ['super-admin', 'admin', 'superviseur'];
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $this->anonymized_at === null
-            && $this->hasAnyRole(self::PANEL_ROLES);
-    }
-
-    public function canManageRole(Role $role): bool
-    {
-        return $this->hierarchyLevel() < $role->hierarchy_level;
+        return $this->hasOne(Cart::class);
     }
 }

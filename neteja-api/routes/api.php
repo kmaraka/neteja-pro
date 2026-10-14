@@ -7,11 +7,12 @@ use App\Modules\Auth\Http\Controllers\PasswordController;
 use App\Modules\Compliance\Http\Controllers\AccountController;
 use App\Modules\Compliance\Http\Controllers\ConsentController;
 use App\Modules\Ecommerce\Http\Controllers\AddressController;
+use App\Modules\Ecommerce\Http\Controllers\CartController;
 use App\Modules\Ecommerce\Http\Controllers\CatalogController;
 use App\Modules\Ecommerce\Http\Controllers\DeliveryZoneController;
 use Illuminate\Support\Facades\Route;
 
-// --- Public ---
+// --- Public : authentification ---
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -20,11 +21,23 @@ Route::prefix('auth')->group(function () {
     Route::post('password/reset', [PasswordController::class, 'reset'])->middleware('throttle:password-reset');
 });
 
-// Boutique : consultation libre, sans compte.
+// --- Public : boutique (consultation libre, sans compte) ---
 Route::get('categories', [CatalogController::class, 'categories']);
 Route::get('products', [CatalogController::class, 'products']);
 Route::get('products/{slug}', [CatalogController::class, 'product']);
 Route::get('delivery-zones', [DeliveryZoneController::class, 'index']);
+
+// Panier : ouvert aux visiteurs (jeton X-Cart-Token) comme aux comptes connectés.
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'show']);
+    Route::delete('/', [CartController::class, 'clear']);
+    Route::post('items', [CartController::class, 'addItem']);
+    Route::put('items/{item}', [CartController::class, 'updateItem'])->whereNumber('item');
+    Route::delete('items/{item}', [CartController::class, 'removeItem'])->whereNumber('item');
+    Route::post('promo', [CartController::class, 'applyPromo'])->middleware('throttle:promo');
+    Route::delete('promo', [CartController::class, 'removePromo']);
+    Route::post('merge', [CartController::class, 'merge'])->middleware('auth:sanctum');
+});
 
 // --- Connecté ---
 Route::middleware('auth:sanctum')->group(function () {
