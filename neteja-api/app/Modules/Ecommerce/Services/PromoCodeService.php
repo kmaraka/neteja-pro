@@ -64,4 +64,16 @@ class PromoCodeService
             $locked->increment('uses_count');
         });
     }
+
+    /** Rend une utilisation (commande annulée avant paiement). Jamais en dessous de zéro. */
+    public function release(PromoCode $promo): void
+    {
+        DB::transaction(function () use ($promo) {
+            $locked = PromoCode::whereKey($promo->id)->lockForUpdate()->first();
+
+            if ($locked && $locked->uses_count > 0) {
+                $locked->decrement('uses_count');
+            }
+        });
+    }
 }

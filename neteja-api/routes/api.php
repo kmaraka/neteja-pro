@@ -10,6 +10,7 @@ use App\Modules\Ecommerce\Http\Controllers\AddressController;
 use App\Modules\Ecommerce\Http\Controllers\CartController;
 use App\Modules\Ecommerce\Http\Controllers\CatalogController;
 use App\Modules\Ecommerce\Http\Controllers\DeliveryZoneController;
+use App\Modules\Ecommerce\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 // --- Public : authentification ---
@@ -59,5 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('addresses/{address}', [AddressController::class, 'update'])->whereNumber('address');
         Route::post('addresses/{address}/default', [AddressController::class, 'makeDefault'])->whereNumber('address');
         Route::delete('addresses/{address}', [AddressController::class, 'destroy'])->whereNumber('address');
+
+        Route::post('checkout', [OrderController::class, 'checkout'])->middleware('throttle:10,1');
+        Route::get('orders', [OrderController::class, 'index']);
+        Route::get('orders/{number}', [OrderController::class, 'show'])->where('number', 'CMD-[0-9]{4}-[0-9]{6}');
+        Route::post('orders/{number}/cancel', [OrderController::class, 'cancel'])->where('number', 'CMD-[0-9]{4}-[0-9]{6}');
     });
 });
