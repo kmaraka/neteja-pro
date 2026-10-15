@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { cartToken } from './cartToken'
 
 export const api = axios.create({
   // Vide en développement (le proxy Vite relaie). En production : l'URL de l'API.
@@ -13,6 +14,13 @@ export const api = axios.create({
 
 /** À appeler avant la connexion : pose le cookie CSRF et la session. */
 export const csrf = () => api.get('/sanctum/csrf-cookie')
+
+// Panier d'un visiteur : son jeton accompagne chaque requête (l'API l'ignore pour un compte connecté).
+api.interceptors.request.use((config) => {
+  const token = cartToken.get()
+  if (token) config.headers['X-Cart-Token'] = token
+  return config
+})
 
 // 419 = jeton CSRF expiré : on le renouvelle et on rejoue la requête une fois.
 api.interceptors.response.use(undefined, async (error) => {

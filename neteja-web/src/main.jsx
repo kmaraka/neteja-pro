@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router'
 import App from './App.jsx'
 import { AuthProvider } from './features/auth/AuthProvider.jsx'
 import './index.css'
+import '@fontsource-variable/bricolage-grotesque'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

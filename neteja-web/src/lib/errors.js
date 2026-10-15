@@ -24,3 +24,9 @@ export function parseError(error) {
 
 /** Premier message d'erreur d'un champ (ou undefined). */
 export const fieldError = (fields, name) => fields?.[name]?.[0]
+
+/** Premier message lisible d'une erreur analysée : celui d'un champ, sinon le message général. */
+export function firstMessage(parsed) {
+  const firstField = Object.values(parsed.fields ?? {})[0]
+  return firstField?.[0] ?? parsed.message
+}

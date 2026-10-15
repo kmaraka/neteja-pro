@@ -6,14 +6,6 @@ import App from '../../App'
 import { api, csrf } from '../../lib/api'
 import { AuthProvider } from './AuthProvider'
 
-// Mock global de localStorage pour éviter le crash de localStorage.clear
-global.localStorage = {
-  clear: vi.fn(),
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-}
-
 vi.mock('../../lib/api', () => ({
   api: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
   csrf: vi.fn(),
@@ -39,6 +31,7 @@ function mockSession({ user = null, pending = [] } = {}) {
       return { data: { user } }
     }
     if (url === '/api/consents/pending') return { data: { pending } }
+    if (url === '/api/cart') return { data: { data: { lines: [], items_count: 0 } } }
     throw new Error(`Appel inattendu : ${url}`)
   })
 }
@@ -76,21 +69,21 @@ describe('accès aux pages', () => {
     ).toBeInTheDocument()
   })
 
-  it('laisse changer le mot de passe même avec des conditions en attente', async () => {
-    mockSession({ user: baseUser, pending: ['cgu'] })
-    renderApp('/changer-mot-de-passe')
-
-    expect(
-      await screen.findByRole('heading', { name: 'Changer mon mot de passe' }),
-    ).toBeInTheDocument()
-  })
-
   it("demande d'accepter les conditions en attente", async () => {
     mockSession({ user: baseUser, pending: ['cgu'] })
     renderApp('/compte')
 
     expect(
       await screen.findByRole('heading', { name: "Conditions d'utilisation" }),
+    ).toBeInTheDocument()
+  })
+
+  it('laisse changer le mot de passe même avec des conditions en attente', async () => {
+    mockSession({ user: baseUser, pending: ['cgu'] })
+    renderApp('/changer-mot-de-passe')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Changer mon mot de passe' }),
     ).toBeInTheDocument()
   })
 

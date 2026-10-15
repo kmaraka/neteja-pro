@@ -1,7 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1E5145;
-  --color-accent: #A2C59A;
-  --color-secondary: #69727B;
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-night: #12382F;     /* barre d'infos, pied de page */
+  --color-primary: #1E5145;   /* forêt : actions, liens */
+  --color-accent: #A2C59A;    /* menthe : surfaces douces */
+  --color-citron: #F0CF4A;    /* énergie : bouton principal sur fond sombre */
+  --color-secondary: #69727B; /* ardoise : textes secondaires */
+  --color-ink: #1B2B27;       /* texte principal */
+  --color-paper: #F7F9F6;     /* fond des pages */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  /* Le focus clavier doit toujours être visible. */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
